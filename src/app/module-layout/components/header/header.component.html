@@ -1,1 +1,48 @@
-<p>header works!</p>
+<header class="header">
+  
+    <div class="header__top">
+      <div class="container">
+        phone
+
+        <span (click)="openAuth()">auth</span>
+        lang
+      </div>
+    </div>
+
+    <div class="header__bottom">
+     <div class="container">
+      <a href="#">
+        <img src="" alt="Dominos logo">
+      </a>
+
+      <ul class="header__list">
+        <li>
+          <a href="#">Pizza</a>
+        </li>
+
+        <li>
+          <a href="#">Drinks</a>
+        </li>
+
+        <li>
+          <a href="#">Sides</a>
+        </li>
+
+        <li>
+          <a href="#">Dessert</a>
+        </li>
+      </ul>
+
+      <figure>
+        Checkout
+      </figure>
+
+      <nav>
+        burger
+      </nav>
+     </div>
+
+    </div>
+
+    <app-auth class="header__auth" [class.header__auth--opened]="isAuthOpened"></app-auth>
+</header>

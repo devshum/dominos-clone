@@ -1,3 +1,41 @@
+@use '../../../../assets/styles/abstracts/variables' as variables;
+
 :host {
   display: block;
+}
+
+.header {
+  .container {
+    display: flex;
+  }
+
+  &__top {
+    background-color: variables.$gray-1;
+  }
+
+  &__bottom {
+    background-color: variables.$gray;
+  }
+
+  &__list {
+    display: flex;
+
+    a {
+      color: variables.$gray-2;
+    }
+  }
+
+  &__auth {
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    &--opened {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
 }
