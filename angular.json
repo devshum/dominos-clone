@@ -7,7 +7,9 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
-          "style": "scss"
+          "style": "scss",
+          "displayBlock": true,
+          "changeDetection": "OnPush"
         },
         "@schematics/angular:application": {
           "strict": true
@@ -103,9 +105,21 @@
             ],
             "scripts": []
           }
+        },
+        "lint": {
+          "builder": "@angular-eslint/builder:lint",
+          "options": {
+            "lintFilePatterns": [
+              "src/**/*.ts",
+              "src/**/*.html"
+            ]
+          }
         }
       }
     }
   },
-  "defaultProject": "dominos"
+  "defaultProject": "dominos",
+  "cli": {
+    "defaultCollection": "@angular-eslint/schematics"
+  }
 }
