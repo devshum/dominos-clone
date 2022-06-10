@@ -1,1 +1,44 @@
-<p>auth works!</p>
+<form class="auth" 
+      *ngIf="isLoginMode"
+      [formGroup]="formIn"
+      (ngSubmit)="submitForm()">
+  <h2>Sign in</h2>
+  <input formControlName="login" type="text" placeholder="Login">
+  <input formControlName="password" type="text" placeholder="Password">
+
+  <span>Forgot password?</span>
+
+  <button type="submit">
+    Sign in
+  </button>
+
+  <button type="button" (click)="changeLoginMode()">
+    Registration
+  </button>
+
+  <ul class="auth__social">
+    <li>Sign in with a social network</li>
+    <li>Facebook</li>
+    <li>Google</li>
+  </ul>
+</form>
+
+<form class="auth" 
+      *ngIf="!isLoginMode"
+      [formGroup]="formUp"
+      (ngSubmit)="submitForm()">
+  <h2>Registration</h2>
+  <input formControlName="email" type="text" placeholder="Your email">
+  <input formControlName="password" placeholder="Password">
+  <input formControlName="repeatedPassword" placeholder="Repeat your password">
+
+  <button type="submit">
+    Register
+  </button>
+
+  <button type="button" (click)="changeLoginMode()">
+    Return to sign in
+  </button>
+</form>
+
+
