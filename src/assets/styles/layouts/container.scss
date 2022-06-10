@@ -1,0 +1,6 @@
+@use '../../../assets/styles/abstracts/variables' as variables;
+
+.container {
+  max-width: variables.$container;
+  margin: 0 auto;
+}

@@ -1,0 +1,10 @@
+@use '../../../assets/styles/abstracts/variables' as variables;
+
+body {
+  font-family: variables.$font-roboto;
+  font-size: variables.$default-font-size;
+  line-height: variables.$default-line-height;
+  font-weight: variables.$default-font-weight;
+  color: variables.$gray;
+  height: 100vh;
+}
