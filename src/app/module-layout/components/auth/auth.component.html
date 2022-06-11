@@ -3,8 +3,17 @@
       [formGroup]="formIn"
       (ngSubmit)="submitForm()">
   <h2>Sign in</h2>
-  <input formControlName="login" type="text" placeholder="Login">
-  <input formControlName="password" type="text" placeholder="Password">
+ 
+  <div>
+    <input formControlName="login" type="text" placeholder="Login">
+    <span *ngIf="hasError(login, 'required')">email is not valid</span>
+  </div>
+
+  <div>
+    <input formControlName="passwordIn" type="text" placeholder="Password">
+    <span *ngIf="hasError(passwordIn, 'required')">email is not valid</span>
+  </div>
+  
 
   <span>Forgot password?</span>
 
@@ -28,9 +37,27 @@
       [formGroup]="formUp"
       (ngSubmit)="submitForm()">
   <h2>Registration</h2>
-  <input formControlName="email" type="text" placeholder="Your email">
-  <input formControlName="password" placeholder="Password">
-  <input formControlName="repeatedPassword" placeholder="Repeat your password">
+  
+  <div>
+    <input formControlName="email" type="text" placeholder="Your email">
+    <span *ngIf="hasError(email, 'required')">email is required</span>
+    <span *ngIf="hasError(email, 'email')">email is not valid</span>
+  </div>
+
+  <div>
+    <input formControlName="passwordUp" placeholder="Password">
+    <span *ngIf="hasError(passwordUp, 'required')">password is required</span>
+    <span *ngIf="hasError(passwordUp, 'minlength')">must be at least 8 characters! </span>
+    <span *ngIf="hasError(passwordUp, 'hasNumber')">must contain at least 1 number</span>
+    <span *ngIf="hasError(passwordUp, 'hasCapitalCase')">must contain at least 1 Capital Case!</span>
+    <span *ngIf="hasError(passwordUp, 'hasSmallCase')">must contain at least 1 Letter is Small Case!</span> 
+  </div>
+
+  <div>
+    <input formControlName="repeatedPassword" placeholder="Repeat your password">
+    <span *ngIf="hasError(repeatedPassword, 'required')">must not be empty</span>
+    <span *ngIf="hasError(repeatedPassword, 'NoPassswordMatch')">passwords do not match</span>
+  </div>
 
   <button type="submit">
     Register
