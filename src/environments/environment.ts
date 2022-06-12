@@ -3,6 +3,7 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
+  apiKey: 'https://api-dominos.herokuapp.com',
   production: false
 };
 

@@ -1,3 +1,8 @@
+<!-- Test -->
+<div *ngIf="user$ | async as user">
+  {{ user.username }}
+</div>
+
 <form class="auth" 
       *ngIf="isLoginMode"
       [formGroup]="formIn"
@@ -10,7 +15,7 @@
   </div>
 
   <div>
-    <input formControlName="passwordIn" type="text" placeholder="Password">
+    <input formControlName="passwordIn" type="password" placeholder="Password">
     <span *ngIf="hasError(passwordIn, 'required')">email is not valid</span>
   </div>
   
@@ -45,7 +50,7 @@
   </div>
 
   <div>
-    <input formControlName="passwordUp" placeholder="Password">
+    <input formControlName="passwordUp" type="password" placeholder="Password">
     <span *ngIf="hasError(passwordUp, 'required')">password is required</span>
     <span *ngIf="hasError(passwordUp, 'minlength')">must be at least 8 characters! </span>
     <span *ngIf="hasError(passwordUp, 'hasNumber')">must contain at least 1 number</span>
@@ -54,7 +59,7 @@
   </div>
 
   <div>
-    <input formControlName="repeatedPassword" placeholder="Repeat your password">
+    <input formControlName="repeatedPassword" type="password" placeholder="Repeat your password">
     <span *ngIf="hasError(repeatedPassword, 'required')">must not be empty</span>
     <span *ngIf="hasError(repeatedPassword, 'NoPassswordMatch')">passwords do not match</span>
   </div>
