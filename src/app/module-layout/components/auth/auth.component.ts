@@ -1,6 +1,11 @@
+import { LoginResponse } from './../../../core/interfaces/login-response';
+import { AuthService } from './../../../core/services/auth.service';
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { AbstractControl, AbstractControlOptions, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CustomValidators } from 'src/app/core/validators/custom-validators';
+import { switchMap, catchError } from 'rxjs/operators';
+import { EMPTY, Observable } from 'rxjs';
+import { User } from 'src/app/core/interfaces/user';
 
 @Component({
   selector: 'app-auth',
@@ -9,12 +14,14 @@ import { CustomValidators } from 'src/app/core/validators/custom-validators';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AuthComponent implements OnInit {
+  public user$: Observable<User>
   public isLoginMode = true;
   public formIn: FormGroup;
   public formUp: FormGroup;
   
   constructor(
-    private _fb: FormBuilder
+    private _fb: FormBuilder,
+    private _authService: AuthService
   ) { }
 
   ngOnInit(): void {
@@ -28,7 +35,28 @@ export class AuthComponent implements OnInit {
     if(this.isLoginMode) {
       this.formIn.markAllAsTouched();
       if(this.formIn.valid) {
-        console.log(this.formIn.value);
+        this.user$ = this._authService
+          .login(
+            this.formIn.value.login, 
+            this.formIn.value.passwordIn
+          ) 
+          .pipe(
+            switchMap(() => {
+              return this._authService.credentials$
+            }),
+            switchMap((credentials: LoginResponse | null) => {
+              if(credentials?.token) {
+                return this._authService.current();
+              }
+
+              return EMPTY;
+            }),
+            catchError((error: any) => {
+              console.log(error);
+
+              return EMPTY
+            })
+          )
       }
     } else {
       this.formUp.markAllAsTouched();
