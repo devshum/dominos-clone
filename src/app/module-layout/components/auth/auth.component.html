@@ -1,5 +1,5 @@
 <!-- Test -->
-<div *ngIf="user$ | async as user">
+<div *ngIf="currentUser$ | async as user" (click)="logout()">
   {{ user.username }}
 </div>
 

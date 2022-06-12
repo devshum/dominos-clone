@@ -1,10 +1,9 @@
-import { LoginResponse } from './../../../core/interfaces/login-response';
-import { AuthService } from './../../../core/services/auth.service';
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { AuthService } from 'src/app/core/services/auth/auth.service';
+import { Component, OnInit, ChangeDetectionStrategy, OnDestroy } from '@angular/core';
 import { AbstractControl, AbstractControlOptions, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CustomValidators } from 'src/app/core/validators/custom-validators';
-import { switchMap, catchError } from 'rxjs/operators';
-import { EMPTY, Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators'
 import { User } from 'src/app/core/interfaces/user';
 
 @Component({
@@ -13,11 +12,12 @@ import { User } from 'src/app/core/interfaces/user';
   styleUrls: ['./auth.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AuthComponent implements OnInit {
-  public user$: Observable<User>
+export class AuthComponent implements OnInit, OnDestroy {
+  public currentUser$: Observable<User | null>;
   public isLoginMode = true;
   public formIn: FormGroup;
   public formUp: FormGroup;
+  private _unsubscribe: Subject<any> = new Subject<any>();
   
   constructor(
     private _fb: FormBuilder,
@@ -27,6 +27,8 @@ export class AuthComponent implements OnInit {
   ngOnInit(): void {
     this._initFormIn();
     this._initFormUp();
+
+    this.currentUser$ = this._authService.user$;
   }
 
   public submitForm() {
@@ -35,28 +37,12 @@ export class AuthComponent implements OnInit {
     if(this.isLoginMode) {
       this.formIn.markAllAsTouched();
       if(this.formIn.valid) {
-        this.user$ = this._authService
-          .login(
-            this.formIn.value.login, 
-            this.formIn.value.passwordIn
-          ) 
-          .pipe(
-            switchMap(() => {
-              return this._authService.credentials$
-            }),
-            switchMap((credentials: LoginResponse | null) => {
-              if(credentials?.token) {
-                return this._authService.current();
-              }
-
-              return EMPTY;
-            }),
-            catchError((error: any) => {
-              console.log(error);
-
-              return EMPTY
-            })
-          )
+        this._authService.login(
+          this.formIn.value.login, 
+          this.formIn.value.passwordIn
+        ).pipe(
+          takeUntil(this._unsubscribe)
+        ).subscribe();
       }
     } else {
       this.formUp.markAllAsTouched();
@@ -64,6 +50,13 @@ export class AuthComponent implements OnInit {
         console.log(this.formUp.value);
       }
     }
+  }
+
+  public logout() {
+    console.log('logout');
+    this._authService.logout().pipe(
+      takeUntil(this._unsubscribe)
+    ).subscribe();
   }
 
   public changeLoginMode(): void {
@@ -92,6 +85,10 @@ export class AuthComponent implements OnInit {
 
   get repeatedPassword(): AbstractControl {
     return this.formUp.get('repeatedPassword') as AbstractControl;
+  }
+
+  ngOnDestroy(): void {
+    this._unsubscribe.next();
   }
 
   private _initFormIn(): void {
