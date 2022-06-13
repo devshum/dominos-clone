@@ -1,26 +1,32 @@
 import { StorageService } from './../local-storage/storage.service';
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Subject, EMPTY, Observable } from 'rxjs';
-import { catchError, switchMap, map, tap } from 'rxjs/operators';
+import { catchError, switchMap, map, tap, takeUntil } from 'rxjs/operators';
 import { LoginResponse } from '../../interfaces/login-response';
 import { User } from '../../interfaces/user';
 
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService {
+export class AuthService implements OnDestroy {
   public credentials$: BehaviorSubject<LoginResponse | null> = new BehaviorSubject<LoginResponse | null>(null);
   public user$: Subject<User | null> = new Subject<User | null>();
+  public tokenExpirationTimer: any;
 
   private _apiKey = environment.apiKey;
   private _storageKey = 'dominos__auth';
+  private _unsubscribe: Subject<any> = new Subject<any>();
 
   constructor(
     private _http: HttpClient,
     private _storageService: StorageService
   ) { }
+
+  ngOnDestroy(): void {
+    this._unsubscribe.next();
+  }
 
   public login(
     username: string, 
@@ -33,11 +39,14 @@ export class AuthService {
       map((credentials: LoginResponse | any) => {
         this.credentials$.next(credentials);
         this._storageService.setItem(this._storageKey, credentials);
+
+        this._autoLogout(credentials.expiredAt);
+
         return credentials
       }),
       switchMap(({token}) => {
         if(token) {
-          return this.current();
+          return this._current();
         }
 
         return EMPTY;
@@ -57,12 +66,15 @@ export class AuthService {
     const credentials = this._storageService.getItem(this._storageKey);
     this.credentials$.next(credentials);
 
+    
     if(!credentials) {
       return EMPTY
     }
-
+    
     if(credentials) {
-      return this.current().pipe(
+      this._autoLogout(credentials.expiredAt);
+
+      return this._current().pipe(
         tap((user: User) => {
           this.user$.next(user);
         })
@@ -70,15 +82,32 @@ export class AuthService {
     }
   }
 
-  public current(): Observable<User> {
-    return this._http.get<User>(`${this._apiKey}/user/current`);
-  }
-
   public logout(): Observable<void> {
     return this._http.post<void>(`${this._apiKey}/user/logout`, {})
     .pipe(tap(() => {
+      if(this.tokenExpirationTimer) {
+        clearTimeout(this.tokenExpirationTimer);
+      }
+
+      this.tokenExpirationTimer = null;
+
       this._storageService.removeItem(this._storageKey);
       this.user$.next(null);
     }));
+
+  }
+  
+  private _autoLogout(expiredAt: number): void {
+    const expirationDuration = new Date(expiredAt).getTime() - new Date().getTime();
+
+    this.tokenExpirationTimer = setTimeout(() => {
+      this.logout().pipe(
+        takeUntil(this._unsubscribe)
+      ).subscribe();
+    }, expirationDuration);
+  }
+
+  private _current(): Observable<User> {
+    return this._http.get<User>(`${this._apiKey}/user/current`);
   }
 }
