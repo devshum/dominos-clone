@@ -5,3 +5,8 @@
 @use 'assets/styles/base/utilities';
 
 @use 'assets/styles/layouts/container';
+
+// packages' styles
+@use 'node_modules/primeicons/primeicons';
+@use 'node_modules/primeng/resources/themes/lara-light-indigo/theme';
+@use 'node_modules/primeng/resources/primeng.min';
