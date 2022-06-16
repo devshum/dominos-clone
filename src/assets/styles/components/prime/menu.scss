@@ -1,0 +1,47 @@
+@use '../../abstracts/variables' as variables;
+
+.menu {
+  .p-menu {
+    padding: unset;
+    overflow: hidden;
+    width: 11rem;
+    border-radius: variables.$radius;
+    margin-top: variables.$margin-xs;
+
+    .p-menuitem-link {
+      &:not(.p-disabled):hover {
+        background: variables.$transparent-black;
+
+        .p-menuitem-text {
+          color: variables.$gray-1;
+        }
+      }
+    }
+  }
+
+  .p-menuitem {
+    color: currentColor;
+    height: variables.$height-5;
+    font-size: variables.$default-font-size;
+    transition: variables.$transition;
+
+
+    &-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      padding: unset;
+      width: 100%;
+      height: 100%;
+    }
+
+    &:not(:last-child) {
+      border-bottom: 0.1rem solid variables.$transparent-black;
+    }
+
+    &:hover {
+      background-color: variables.$transparent-black;
+    }
+  }
+}
