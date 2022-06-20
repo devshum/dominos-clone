@@ -3,7 +3,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { BehaviorSubject, Subject, EMPTY, Observable } from 'rxjs';
-import { catchError, switchMap, map, tap, takeUntil } from 'rxjs/operators';
+import { catchError, switchMap, map, tap } from 'rxjs/operators';
 import { LoginResponse } from '../../interfaces/login-response';
 import { User } from '../../interfaces/user';
 
@@ -13,10 +13,9 @@ import { User } from '../../interfaces/user';
 export class AuthService implements OnDestroy {
   public credentials$: BehaviorSubject<LoginResponse | null> = new BehaviorSubject<LoginResponse | null>(null);
   public user$: Subject<User | null> = new Subject<User | null>();
-  public tokenExpirationTimer: any;
 
   private _apiKey = environment.apiKey;
-  private _storageKey = 'dominos__auth';
+  private _storageKey = environment.storageKey;
   private _unsubscribe: Subject<any> = new Subject<any>();
 
   constructor(
@@ -40,9 +39,7 @@ export class AuthService implements OnDestroy {
         this.credentials$.next(credentials);
         this._storageService.setItem(this._storageKey, credentials);
 
-        this._autoLogout(credentials.expiredAt);
-
-        return credentials
+        return credentials;
       }),
       switchMap(({token}) => {
         if(token) {
@@ -66,45 +63,26 @@ export class AuthService implements OnDestroy {
     const credentials = this._storageService.getItem(this._storageKey);
     this.credentials$.next(credentials);
 
+    console.log('autologin');
     
-    if(!credentials) {
-      return EMPTY
-    }
-    
-    if(credentials) {
-      this._autoLogout(credentials.expiredAt);
-
+    if(credentials) {    
       return this._current().pipe(
         tap((user: User) => {
           this.user$.next(user);
         })
       );
+    } else {
+      return EMPTY
     }
   }
-
+     
   public logout(): Observable<void> {
     return this._http.post<void>(`${this._apiKey}/user/logout`, {})
-    .pipe(tap(() => {
-      if(this.tokenExpirationTimer) {
-        clearTimeout(this.tokenExpirationTimer);
-      }
-
-      this.tokenExpirationTimer = null;
-
+    .pipe(tap(() => {  
       this._storageService.removeItem(this._storageKey);
       this.user$.next(null);
     }));
-
-  }
-  
-  private _autoLogout(expiredAt: number): void {
-    const expirationDuration = new Date(expiredAt).getTime() - new Date().getTime();
-
-    this.tokenExpirationTimer = setTimeout(() => {
-      this.logout().pipe(
-        takeUntil(this._unsubscribe)
-      ).subscribe();
-    }, expirationDuration);
+    
   }
 
   private _current(): Observable<User> {
